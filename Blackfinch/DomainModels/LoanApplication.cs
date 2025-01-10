@@ -1,9 +1,4 @@
 ﻿namespace Blackfinch.DomainModels;
-
-using System;
-
-using static System.Net.Mime.MediaTypeNames;
-
 public class LoanApplication
 {
     public LoanApplication(decimal loanValue, decimal assetValue, Applicant applicant)
@@ -21,27 +16,19 @@ public class LoanApplication
 
     public bool ApplicationSuccessful { get; private set; }
 
-    public decimal LoanToValue => LoanValue / AssetValue * 100;
+    public decimal LoanToValue => (LoanValue / AssetValue) * 100;
     
     public bool IsValidApplication()
     {
-        if (LoanValue < 100_000 || LoanValue > 1_500_000 || LoanToValue > 90)
-        {
-            return false;
-        }
-
         if (LoanValue >= 1_000_000)
         {
-            if (LoanToValue < 60 && Applicant.CreditScore >= 950)
-            {
-                return true;
-            }
+            return CheckLoanToValueAndCreditScore(60, 950);
         }
         else
         {
-            if (LoanToValue < 60 && Applicant.CreditScore >= 750
-                || LoanToValue < 80 && Applicant.CreditScore >= 800
-                || LoanToValue < 90 && Applicant.CreditScore >= 900)
+            if (CheckLoanToValueAndCreditScore(60,750)
+                || CheckLoanToValueAndCreditScore(80, 800)
+                || CheckLoanToValueAndCreditScore(90, 900))
             {
                 return true;
             }
@@ -54,4 +41,7 @@ public class LoanApplication
     {
         ApplicationSuccessful = applicationSuccessful;
     }
+
+    private bool CheckLoanToValueAndCreditScore(decimal loanToValue, int creditScore) 
+        => LoanToValue < loanToValue && Applicant.CreditScore >= creditScore;
 }

@@ -2,6 +2,7 @@ namespace Blackfinch.UnitTests.Tests;
 
 using Blackfinch.DomainModels;
 using Blackfinch.Services;
+using Blackfinch.Validators;
 
 public class CreateLoanApplicationTests
 {    
@@ -10,14 +11,14 @@ public class CreateLoanApplicationTests
     public void WhenCreditScoreIsZeroShouldReturnFalse()
     {
         // Arrange        
-        LoanApplication loan = new(100_000M, 100_000M, new Applicant(0));
-        LoanService loanService = new();
+        LoanApplication loan = new(100_000M, 200_000M, new Applicant(0));
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.False(actual.ApplicationSuccessful);
+        Assert.Equal("The credit score must be between 1 and 999", actual.ApplicationResult);
     }
 
     [Fact]
@@ -25,14 +26,14 @@ public class CreateLoanApplicationTests
     public void WhenCreditScoreIsOneThousandShouldReturnFalse()
     {
         // Arrange        
-        LoanApplication loan = new(100_000M, 100_000M, new Applicant(1000));
-        LoanService loanService = new();
+        LoanApplication loan = new(100_000M, 200_000M, new Applicant(1000));
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.False(actual.ApplicationSuccessful);
+        Assert.Equal("The credit score must be between 1 and 999", actual.ApplicationResult);
     }
 
     [Fact]
@@ -41,13 +42,13 @@ public class CreateLoanApplicationTests
     {
         // Arrange        
         LoanApplication loan = new(100_000M, 170_000M, new Applicant(750));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.True(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was successful", actual.ApplicationResult);
     }
 
     [Fact]
@@ -56,13 +57,13 @@ public class CreateLoanApplicationTests
     {
         // Arrange        
         LoanApplication loan = new(1_500_000M, 2_600_000M, new Applicant(950));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.True(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was successful", actual.ApplicationResult);
     }
 
     [Fact]
@@ -70,14 +71,14 @@ public class CreateLoanApplicationTests
     public void WhenLoanValueIsGreaterThanOnePointFiveMillionShouldReturnFalse()
     {
         // Arrange
-        LoanApplication loan = new(1_500_001M, 100_000M, new Applicant(100));
-        LoanService loanService = new();
+        LoanApplication loan = new(1_500_001M, 200_000M, new Applicant(100));
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.False(actual.ApplicationSuccessful);
+        Assert.Equal("The loan value must be between 100,000 and 1,500,000", actual.ApplicationResult);
     }
 
     [Fact]
@@ -86,13 +87,13 @@ public class CreateLoanApplicationTests
     {
         // Arrange
         LoanApplication loan = new(1_000_000, 1_700_000, new Applicant(950));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.True(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was successful", actual.ApplicationResult);
     }
 
     [Fact]
@@ -101,13 +102,13 @@ public class CreateLoanApplicationTests
     {
         // Arrange
         LoanApplication loan = new(1_000_000, 1_600_000, new Applicant(949));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.False(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was declined", actual.ApplicationResult);
     }
 
     [Fact]
@@ -116,13 +117,13 @@ public class CreateLoanApplicationTests
     {
         // Arrange
         LoanApplication loan = new(1_000_000, 1_600_000, new Applicant(949));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.False(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was declined", actual.ApplicationResult);
     }
 
     [Fact]
@@ -131,13 +132,13 @@ public class CreateLoanApplicationTests
     {
         // Arrange
         LoanApplication loan = new(500_000, 835_000, new Applicant(750));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.True(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was successful", actual.ApplicationResult);
     }
 
     [Fact]
@@ -146,13 +147,13 @@ public class CreateLoanApplicationTests
     {
         // Arrange
         LoanApplication loan = new(500_000, 830_000, new Applicant(750));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.False(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was declined", actual.ApplicationResult);
     }
 
     [Fact]
@@ -161,13 +162,13 @@ public class CreateLoanApplicationTests
     {
         // Arrange
         LoanApplication loan = new(500_000, 830_000, new Applicant(740));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.False(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was declined", actual.ApplicationResult);
     }
 
     [Fact]
@@ -176,13 +177,13 @@ public class CreateLoanApplicationTests
     {
         // Arrange
         LoanApplication loan = new(500_000, 628_000, new Applicant(800));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.True(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was successful", actual.ApplicationResult);
     }
 
     [Fact]
@@ -191,13 +192,13 @@ public class CreateLoanApplicationTests
     {
         // Arrange
         LoanApplication loan = new(500_000, 625_000, new Applicant(799));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.False(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was declined", actual.ApplicationResult);
     }
 
     [Fact]
@@ -206,13 +207,13 @@ public class CreateLoanApplicationTests
     {
         // Arrange
         LoanApplication loan = new(500_000, 625_000, new Applicant(799));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.False(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was declined", actual.ApplicationResult);
     }
 
     [Fact]
@@ -221,13 +222,13 @@ public class CreateLoanApplicationTests
     {
         // Arrange
         LoanApplication loan = new(500_000, 556_000, new Applicant(900));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.True(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was successful", actual.ApplicationResult);
     }
 
     [Fact]
@@ -235,14 +236,14 @@ public class CreateLoanApplicationTests
     public void WhenLoanValueIsLessThanOneMillionAndLoanToValueIsNinetyPercentAndCreditScoreIsEightNineNineShouldReturnFalse()
     {
         // Arrange
-        LoanApplication loan = new(500_000, 555_000, new Applicant(899));
-        LoanService loanService = new();
+        LoanApplication loan = new(500_000, 560_000, new Applicant(899));
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.False(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was declined", actual.ApplicationResult);
     }
 
     [Fact]
@@ -250,14 +251,14 @@ public class CreateLoanApplicationTests
     public void WhenLoanValueIsLessThanOneMillionAndLoanToValueIsLessThanNinetyPercentAndCreditScoreIsEightNineNineShouldReturnFalse()
     {
         // Arrange
-        LoanApplication loan = new(500_000, 555_000, new Applicant(899));
-        LoanService loanService = new();
+        LoanApplication loan = new(500_000, 560_000, new Applicant(899));
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.False(actual.ApplicationSuccessful);
+        Assert.Equal("The loan application was declined", actual.ApplicationResult);
     }
 
     [Fact]
@@ -266,12 +267,12 @@ public class CreateLoanApplicationTests
     {
         // Arrange
         LoanApplication loan = new(500_000, 525_000, new Applicant(899));
-        LoanService loanService = new();
+        LoanService loanService = new(new LoanApplicationValidator());
 
         // Act
         Statistics actual = loanService.CreateLoanApplication(loan);
 
         // Assert
-        Assert.False(actual.ApplicationSuccessful);
+        Assert.Equal("The loan to value must be less than 90%", actual.ApplicationResult);
     }
 }

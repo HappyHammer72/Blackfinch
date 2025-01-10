@@ -1,6 +1,9 @@
 ﻿
 using Blackfinch.DomainModels;
 using Blackfinch.Services;
+using Blackfinch.Validators;
+
+using FluentValidation;
 
 public class Program
 {
@@ -11,30 +14,32 @@ public class Program
 
     private static void Main(string[] args)
     {
-        CaptureDataInput();
-        LoanApplication? loan = ValidateUserInput();
+        IValidator<LoanApplication> validator = new LoanApplicationValidator();
+        LoanService loanService = new(validator);
 
-        if (loan is not null)
+        while (_continue)
         {
-            ILoanService loanService = new LoanService();
-            Statistics statistics = loanService.CreateLoanApplication(loan);
-            WriteStatistics(statistics);
+            CaptureDataInput();
+            LoanApplication? loan = ValidateUserInput();
+
+            if (loan is not null)
+            {
+                Statistics statistics = loanService.CreateLoanApplication(loan);
+                WriteStatistics(statistics);
+                Console.WriteLine("Do you want to continue (Y/N)");
+                _continue = Console.ReadLine()?.ToUpper() == "Y";
+            }
         }
     }
 
     private static void CaptureDataInput()
     {
-        while (_continue)
-        {
-            Console.WriteLine("Enter the amount you would like to borrow");
-            _loanAmountInput = Console.ReadLine();
-            Console.WriteLine("Enter the value of the asset");
-            _assetValueInput = Console.ReadLine();
-            Console.WriteLine("Enter your credit score from 1 to 999");
-            _creditScoreInput = Console.ReadLine();
-            Console.WriteLine("Do you want to continue (Y/N)");
-            _continue = Console.ReadLine() == "Y";
-        }
+        Console.WriteLine("Enter the amount you would like to borrow");
+        _loanAmountInput = Console.ReadLine();
+        Console.WriteLine("Enter the value of the asset");
+        _assetValueInput = Console.ReadLine();
+        Console.WriteLine("Enter your credit score from 1 to 999");
+        _creditScoreInput = Console.ReadLine();
     }
 
     private static LoanApplication? ValidateUserInput()
@@ -62,9 +67,10 @@ public class Program
 
     private static void WriteStatistics(Statistics statistics)
     {
-        Console.WriteLine(statistics.ApplicationSuccessful ? "The loan application was successful" : "The loan application failed");
-        Console.WriteLine($"Total Applications: {statistics.ApplicationsToDate}");
-        Console.WriteLine($"Total Loan Value: {statistics.TotalLoanValue}");
-        Console.WriteLine($"Average Loan to Value: {statistics.AverageLoanToValue}");
+        Console.WriteLine(statistics.ApplicationResult);
+        Console.WriteLine($"Total Successful Applications: {statistics.ApplicationsToDate.FirstOrDefault(x => x.Item1)?.Item2 ?? 0}");
+        Console.WriteLine($"Total Declined Applications: {statistics.ApplicationsToDate.FirstOrDefault(x => !x.Item1)?.Item2 ?? 0}");
+        Console.WriteLine($"Total Loan Value: {statistics.TotalLoanValue:C2}");
+        Console.WriteLine($"Average Loan to Value: {statistics.AverageLoanToValue:F2}");
     }
 }

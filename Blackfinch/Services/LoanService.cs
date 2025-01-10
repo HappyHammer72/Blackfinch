@@ -1,20 +1,35 @@
 ﻿namespace Blackfinch.Services;
 
-using FluentValidation.Results;
 using Blackfinch.DomainModels;
+
+using FluentValidation;
+using FluentValidation.Results;
 
 public class LoanService : ILoanService
 {
     private readonly List<LoanApplication> _loanApplications = [];
+    private readonly IValidator<LoanApplication> _validator;
+
+    public LoanService(IValidator<LoanApplication> validator)
+    {
+        _validator = validator;
+    }
 
     public Statistics CreateLoanApplication(LoanApplication loan)
     {
+        ValidationResult validationResult = _validator.Validate(loan);
+
+        if (!validationResult.IsValid)
+        {
+            return new Statistics(validationResult.Errors[0].ErrorMessage, GetApplicationsToDate, GetTotalLoanValue, GetAverageLoanToValue);
+        }
+
         loan.SetApplicationState(loan.IsValidApplication());
         _loanApplications.Add(loan);
 
-        Statistics statistics = new(loan.IsValidApplication(), GetApplicationsToDate, GetTotalLoanValue, 0);
+        string applicationResult = loan.IsValidApplication() ? "The loan application was successful" : "The loan application was declined";
 
-        return statistics;
+        return new(applicationResult, GetApplicationsToDate, GetTotalLoanValue, GetAverageLoanToValue);
     }
 
     private List<Tuple<bool, int>> GetApplicationsToDate => [.. _loanApplications
@@ -23,5 +38,5 @@ public class LoanService : ILoanService
 
     private decimal GetTotalLoanValue => _loanApplications.Sum(x => x.LoanValue);
 
-    private decimal GetAverageLoanToValue => _loanApplications.Average(x => x.LoanToValue);
+    private decimal GetAverageLoanToValue => _loanApplications.Any() ? _loanApplications.Average(x => x.LoanToValue) : 0M;
 }

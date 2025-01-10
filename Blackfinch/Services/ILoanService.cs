@@ -1,9 +1,8 @@
-﻿namespace Blackfinch.Services
-{
-    using Blackfinch.DomainModels;
+﻿namespace Blackfinch.Services;
 
-    public interface ILoanService
-    {
-        Statistics CreateLoanApplication(LoanApplication loan);
-    }
+using Blackfinch.DomainModels;
+
+public interface ILoanService
+{
+    Statistics CreateLoanApplication(LoanApplication loan);
 }
